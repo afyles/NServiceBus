@@ -5,6 +5,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
     using System.Threading;
     using Helpers;
     using Faults;
+    using Licensing;
     using MessageInterfaces.MessageMapper.Reflection;
     using MessageMutator;
     using Monitoring;

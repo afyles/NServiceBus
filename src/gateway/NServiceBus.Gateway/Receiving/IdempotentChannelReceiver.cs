@@ -2,20 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.Specialized;
-    using System.IO;
-    using System.Net;
     using System.Transactions;
     using Channels;
     using Channels.Http;
     using DataBus;
     using HeaderManagement;
+    using Unicast.Transport;
     using log4net;
     using Notifications;
-    using ObjectBuilder;
     using Persistence;
     using Sending;
-    using Unicast.Transport;
     using Utils;
 
     public class IdempotentChannelReceiver : IReceiveMessagesFromSites
@@ -108,8 +104,6 @@
             };
         }
 
-
-
         void HandleSubmit(CallInfo callInfo)
         {
             persister.InsertMessage(callInfo.ClientId, DateTime.UtcNow, callInfo.Data, callInfo.Headers);
@@ -133,7 +127,9 @@
             using (callInfo.Data)
                 newDatabusKey = DataBus.Put(callInfo.Data, timeToBeReceived);
 
-            persister.UpdateHeader(callInfo.ClientId, callInfo.Headers[GatewayHeaders.DatabusKey], newDatabusKey);
+            var specificDataBusHeaderToUpdate = callInfo.Headers[GatewayHeaders.DatabusKey];
+
+            persister.UpdateHeader(callInfo.ClientId, specificDataBusHeaderToUpdate, newDatabusKey);
         }
 
         void HandleAck(CallInfo callInfo)

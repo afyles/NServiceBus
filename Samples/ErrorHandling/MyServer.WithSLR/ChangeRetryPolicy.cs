@@ -3,8 +3,10 @@ using NServiceBus.Config;
 using NServiceBus.Management.Retries;
 using NServiceBus.Management.Retries.Helpers;
 
-namespace MyServer
+namespace MyServerWithSLR
 {
+    using NServiceBus;
+
     public class ChangeRetryPolicy : INeedInitialization
     {
         public void Init()
