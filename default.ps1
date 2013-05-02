@@ -145,7 +145,7 @@ task TestMain -depends CompileMain -description "Builds NServiceBus.dll, keeps t
 
 task CompileCore -depends InitEnvironment -description "Builds NServiceBus.Core.dll and keeps the output in \binaries" { 
 
-$coreDirs = "unicastTransport", "ObjectBuilder", "config", "faults", "utils","setup","powershell", "messageInterfaces", "impl\messageInterfaces", "config", "logging",  "Impl\ObjectBuilder.Common", "installation", "messagemutator", "encryption", "unitofwork", "masterNode", "impl\installation", "impl\unicast\NServiceBus.Unicast.Msmq", "impl\Serializers","forms", "impl\licensing", "unicast", "headers", "impersonation", "impl\unicast\transport", "impl\unicast\queuing", "impl\unicast\NServiceBus.Unicast.Subscriptions.Msmq", "impl\unicast\NServiceBus.Unicast.Subscriptions.InMemory", "impl\faults", "impl\encryption", "databus", "impl\Sagas", "impl\SagaPersisters\InMemory", "impl\SagaPersisters\RavenSagaPersister", "impl\unicast\NServiceBus.Unicast.Subscriptions.Raven", "integration", "impl\databus", "distributor", "gateway", "scheduling", "satellites", "management\retries", "timeout"
+$coreDirs = "unicastTransport", "ObjectBuilder", "config", "faults", "utils","setup","powershell", "messageInterfaces", "impl\messageInterfaces", "config", "logging",  "Impl\ObjectBuilder.Common", "installation", "messagemutator", "encryption", "unitofwork", "impl\installation", "impl\unicast\NServiceBus.Unicast.Msmq", "impl\Serializers","forms", "impl\licensing", "unicast", "headers", "impersonation", "impl\unicast\transport", "impl\unicast\queuing", "impl\unicast\NServiceBus.Unicast.Subscriptions.Msmq", "impl\unicast\NServiceBus.Unicast.Subscriptions.InMemory", "impl\faults", "impl\encryption", "databus", "impl\Sagas", "impl\SagaPersisters\InMemory", "impl\SagaPersisters\RavenSagaPersister", "impl\unicast\NServiceBus.Unicast.Subscriptions.Raven", "integration", "impl\databus", "distributor", "gateway", "scheduling", "satellites", "management\retries", "timeout"
 	$coreDirs | % {
 		$solutionDir = Resolve-Path "$srcDir\$_"
 		cd 	$solutionDir
@@ -178,7 +178,6 @@ $coreDirs = "unicastTransport", "ObjectBuilder", "config", "faults", "utils","se
 	$assemblies += dir $buildBase\nservicebus.core\NLog.dll
 	$assemblies += dir $buildBase\nservicebus.core\Raven.Abstractions.dll
 	$assemblies += dir $buildBase\nservicebus.core\Raven.Client.Lightweight.dll
-	$assemblies += dir $buildBase\nservicebus.core\rhino.licensing.dll
 	$assemblies += dir $buildBase\nservicebus.core\Newtonsoft.Json.dll
 
 	Ilmerge $ilMergeKey $outDir "NServiceBus.Core" $assemblies $attributeAssembly "dll"  $script:ilmergeTargetFramework "$buildBase\NServiceBusCoreMergeLog.txt"  $ilMergeExclude
@@ -516,7 +515,6 @@ function Prepare-Binaries{
 	Copy-Item $buildBase\nservicebus.core\AutoFac.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll
 	Copy-Item $buildBase\nservicebus.core\Raven*.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll, Raven.Client.Debug.dll, Raven.Client.MvcIntegration.dll
 	Copy-Item $buildBase\nservicebus.core\NLog.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll
-	Copy-Item $buildBase\nservicebus.core\rhino.licensing.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll
 	Copy-Item $buildBase\nservicebus.core\Newtonsoft.Json.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll
 	Copy-Item $buildBase\nservicebus.core\ICSharpCode.NRefactory.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll
 	Copy-Item $buildBase\nservicebus.core\Esent.Interop.dll $coreOnlyDir\dependencies\ -Exclude **Tests.dll
