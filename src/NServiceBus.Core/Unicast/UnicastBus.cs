@@ -403,7 +403,7 @@ namespace NServiceBus.Unicast
             MessagingBestPractices.AssertIsValidForReply(messages.ToList());
             if (_messageBeingHandled.ReplyToAddress == null)
                 throw new InvalidOperationException("Reply was called with null reply-to-address field. It can happen if you are using a SendOnly client. See http://particular.net/articles/one-way-send-only-endpoints");
-            SendMessage(_messageBeingHandled.ReplyToAddress, _messageBeingHandled.CorrelationId ?? _messageBeingHandled.Id, MessageIntentEnum.Send, messages);
+            SendMessage(_messageBeingHandled.ReplyToAddress, _messageBeingHandled.CorrelationId ?? _messageBeingHandled.Id, MessageIntentEnum.Reply, messages);
         }
 
         void IBus.Reply<T>(Action<T> messageConstructor)
@@ -417,6 +417,8 @@ namespace NServiceBus.Unicast
                 throw new InvalidOperationException("Return was called with null reply-to-address field. It can happen if you are using a SendOnly client. See http://particular.net/articles/one-way-send-only-endpoints");
 
             var returnMessage = ControlMessage.Create(Address.Local);
+
+            returnMessage.MessageIntent = MessageIntentEnum.Reply;
 
             returnMessage.Headers[Headers.ReturnMessageErrorCodeHeader] = errorCode.GetHashCode().ToString();
             returnMessage.CorrelationId = _messageBeingHandled.CorrelationId ?? _messageBeingHandled.Id;
@@ -685,27 +687,47 @@ namespace NServiceBus.Unicast
             return result;
         }
 
-
-
         List<Type> GetFullTypes(IEnumerable<object> messages)
         {
             var types = new List<Type>();
 
             foreach (var m in messages)
             {
-                var s = MessageMapper.GetMappedTypeFor(m.GetType());
+                var messageType = m.GetType();
+                var s = MessageMapper.GetMappedTypeFor(messageType);
                 if (types.Contains(s))
+                {
                     continue;
+                }
 
                 types.Add(s);
 
-                foreach (var t in m.GetType().GetInterfaces())
-                    if (MessageConventionExtensions.IsMessageType(t))
-                        if (!types.Contains(t))
-                            types.Add(t);
+                foreach (var t in GetParentTypes(messageType)
+                    .Where(MessageConventionExtensions.IsMessageType)
+                    .Where(t => !types.Contains(t)))
+                {
+                    types.Add(t);
+                }
             }
 
             return types;
+        }
+
+        static IEnumerable<Type> GetParentTypes(Type type)
+        {
+            foreach (var i in type.GetInterfaces())
+            {
+                yield return i;
+            }
+
+            // return all inherited types
+            var currentBaseType = type.BaseType;
+            var objectType = typeof(Object);
+            while (currentBaseType != null && currentBaseType != objectType)
+            {
+                yield return currentBaseType;
+                currentBaseType = currentBaseType.BaseType;
+            }
         }
 
         /// <summary>
